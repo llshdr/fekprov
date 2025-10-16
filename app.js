@@ -22,6 +22,7 @@ const tabs = {
   match: document.getElementById('tab-match'),
   quizAll: document.getElementById('tab-quiz-all'),
   game: document.getElementById('tab-game'),
+  quest: document.getElementById('tab-quest'),
   exam: document.getElementById('tab-exam'),
 };
 const panels = {
@@ -30,6 +31,7 @@ const panels = {
   match: document.getElementById('panel-match'),
   quizAll: document.getElementById('panel-quiz-all'),
   game: document.getElementById('panel-game'),
+  quest: document.getElementById('panel-quest'),
   exam: document.getElementById('panel-exam'),
 };
 
@@ -72,6 +74,7 @@ function init() {
   tabs.match.addEventListener('click', () => switchTab('match'));
   tabs.quizAll.addEventListener('click', () => switchTab('quizAll'));
   tabs.game.addEventListener('click', () => switchTab('game'));
+  tabs.quest.addEventListener('click', () => switchTab('quest'));
   tabs.exam.addEventListener('click', () => switchTab('exam'));
   topicSelect.addEventListener('change', () => {
     currentTopic = topicSelect.value;
@@ -127,6 +130,9 @@ function setupAllModes() {
 
   // Game
   resetGameUI();
+
+  // Quest
+  initQuest();
 
   // Exam
   buildExam();
@@ -576,6 +582,333 @@ function buildBigQuestions() {
     'Gör en SWOT-analys av en ny affärsidé och föreslå åtgärder.'
   ];
   return sampleMany(arr, 3);
+}
+
+// ------------------------------
+// Knowledge Quest RPG
+// ------------------------------
+let questState = {
+  level: 1,
+  xp: 0,
+  xpNeeded: 100,
+  hp: 100,
+  maxHp: 100,
+  gold: 0,
+  location: 'Startdungeon',
+  inBattle: false,
+  currentEnemy: null,
+  currentQuestion: null,
+  inventory: [],
+  achievements: [],
+  enemiesDefeated: 0,
+  questionsAnswered: 0
+};
+
+const ENEMIES = [
+  { name: 'Dungeon Goblin', emoji: '👹', hp: 50, xpReward: 25, goldReward: 10 },
+  { name: 'Knowledge Troll', emoji: '🧌', hp: 75, xpReward: 35, goldReward: 15 },
+  { name: 'Business Dragon', emoji: '🐉', hp: 100, xpReward: 50, goldReward: 25 },
+  { name: 'Finance Phantom', emoji: '👻', hp: 80, xpReward: 40, goldReward: 20 },
+  { name: 'Management Beast', emoji: '🦁', hp: 90, xpReward: 45, goldReward: 22 }
+];
+
+const LOCATIONS = [
+  'Startdungeon', 'Knowledge Cavern', 'Business Forest', 'Finance Mountains', 
+  'Management Valley', 'Leadership Peak', 'Final Boss Chamber'
+];
+
+function initQuest() {
+  document.getElementById('btnQuestStart').addEventListener('click', startQuest);
+  document.getElementById('btnQuestAttack').addEventListener('click', attackEnemy);
+  document.getElementById('btnQuestContinue').addEventListener('click', continueQuest);
+  document.getElementById('btnQuestRestart').addEventListener('click', restartQuest);
+  renderLeaderboard('lbQuest');
+  updateQuestUI();
+}
+
+function startQuest() {
+  questState.inBattle = false;
+  questState.currentEnemy = null;
+  document.getElementById('questScene').style.display = 'block';
+  document.getElementById('questBattle').style.display = 'none';
+  document.getElementById('btnQuestStart').style.display = 'none';
+  document.getElementById('btnQuestAttack').style.display = 'none';
+  document.getElementById('btnQuestContinue').style.display = 'block';
+  
+  // Spawn random enemy
+  spawnEnemy();
+  updateQuestUI();
+}
+
+function spawnEnemy() {
+  const enemy = ENEMIES[Math.floor(Math.random() * ENEMIES.length)];
+  questState.currentEnemy = { ...enemy, currentHp: enemy.hp };
+  
+  document.getElementById('questEnemy').style.display = 'block';
+  document.getElementById('questEnemy').textContent = enemy.emoji;
+  document.getElementById('questDialogue').textContent = 
+    `Ett ${enemy.name} har dykt upp! Din kunskap är ditt vapen - svara på frågor för att besegra det!`;
+  
+  document.getElementById('btnQuestContinue').style.display = 'none';
+  document.getElementById('btnQuestAttack').style.display = 'block';
+}
+
+function attackEnemy() {
+  if (!questState.currentEnemy) return;
+  
+  // Show battle interface
+  document.getElementById('questScene').style.display = 'none';
+  document.getElementById('questBattle').style.display = 'block';
+  
+  // Generate random question
+  const question = DATA[Math.floor(Math.random() * DATA.length)];
+  questState.currentQuestion = question;
+  
+  document.getElementById('battleEnemyAvatar').textContent = questState.currentEnemy.emoji;
+  document.getElementById('battleEnemyName').textContent = questState.currentEnemy.name;
+  document.getElementById('enemyHP').textContent = `${questState.currentEnemy.currentHp}/${questState.currentEnemy.hp}`;
+  document.getElementById('enemyHPFill').style.width = `${(questState.currentEnemy.currentHp / questState.currentEnemy.hp) * 100}%`;
+  
+  document.getElementById('battleQuestion').textContent = question.question;
+  
+  // Generate wrong answers
+  const wrongAnswers = sampleMany(DATA.filter(x => x.id !== question.id).map(x => x.answer), 3);
+  const options = shuffleArray([question.answer, ...wrongAnswers]);
+  
+  const optionsEl = document.getElementById('battleOptions');
+  optionsEl.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'battle-option';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => handleBattleAnswer(btn, opt === question.answer));
+    optionsEl.appendChild(btn);
+  });
+}
+
+function handleBattleAnswer(btn, isCorrect) {
+  const options = document.querySelectorAll('.battle-option');
+  options.forEach(opt => opt.disabled = true);
+  
+  if (isCorrect) {
+    btn.classList.add('correct');
+    const damage = 25 + Math.floor(Math.random() * 15); // 25-40 damage
+    questState.currentEnemy.currentHp = Math.max(0, questState.currentEnemy.currentHp - damage);
+    questState.questionsAnswered++;
+    
+    document.getElementById('battleResult').style.display = 'block';
+    document.getElementById('battleResult').textContent = `Korrekt! Du gjorde ${damage} skada!`;
+    document.getElementById('battleResult').style.color = 'var(--good)';
+    
+    // Update enemy HP
+    document.getElementById('enemyHP').textContent = `${questState.currentEnemy.currentHp}/${questState.currentEnemy.hp}`;
+    document.getElementById('enemyHPFill').style.width = `${(questState.currentEnemy.currentHp / questState.currentEnemy.hp) * 100}%`;
+    
+    if (questState.currentEnemy.currentHp <= 0) {
+      // Enemy defeated!
+      setTimeout(() => defeatEnemy(), 1500);
+    } else {
+      setTimeout(() => {
+        document.getElementById('battleResult').style.display = 'none';
+        attackEnemy(); // Next question
+      }, 2000);
+    }
+  } else {
+    btn.classList.add('incorrect');
+    const damage = 10 + Math.floor(Math.random() * 10); // 10-20 damage to player
+    questState.hp = Math.max(0, questState.hp - damage);
+    
+    document.getElementById('battleResult').style.display = 'block';
+    document.getElementById('battleResult').textContent = `Fel svar! Du tog ${damage} skada!`;
+    document.getElementById('battleResult').style.color = 'var(--bad)';
+    
+    updateQuestUI();
+    
+    if (questState.hp <= 0) {
+      setTimeout(() => gameOver(), 1500);
+    } else {
+      setTimeout(() => {
+        document.getElementById('battleResult').style.display = 'none';
+        attackEnemy(); // Try again
+      }, 2000);
+    }
+  }
+}
+
+function defeatEnemy() {
+  questState.enemiesDefeated++;
+  questState.xp += questState.currentEnemy.xpReward;
+  questState.gold += questState.currentEnemy.goldReward;
+  
+  // Check for level up
+  if (questState.xp >= questState.xpNeeded) {
+    levelUp();
+  }
+  
+  // Check achievements
+  checkAchievements();
+  
+  document.getElementById('battleResult').textContent = 
+    `Besegrat! +${questState.currentEnemy.xpReward} XP, +${questState.currentEnemy.goldReward} guld!`;
+  document.getElementById('battleResult').style.color = 'var(--good)';
+  
+  setTimeout(() => {
+    document.getElementById('questBattle').style.display = 'none';
+    document.getElementById('questScene').style.display = 'block';
+    document.getElementById('questEnemy').style.display = 'none';
+    document.getElementById('btnQuestAttack').style.display = 'none';
+    document.getElementById('btnQuestContinue').style.display = 'block';
+    
+    // Move to next location
+    const currentIndex = LOCATIONS.indexOf(questState.location);
+    if (currentIndex < LOCATIONS.length - 1) {
+      questState.location = LOCATIONS[currentIndex + 1];
+    }
+    
+    updateQuestUI();
+    document.getElementById('questDialogue').textContent = 
+      `Bra jobbat! Du har besegrat ${questState.currentEnemy.name}. Fortsätt din resa till ${questState.location}!`;
+  }, 2000);
+}
+
+function levelUp() {
+  questState.level++;
+  questState.maxHp += 20;
+  questState.hp = questState.maxHp; // Full heal on level up
+  questState.xpNeeded = Math.floor(questState.xpNeeded * 1.5);
+  
+  document.getElementById('questDialogue').textContent = 
+    `🎉 LEVEL UP! Du är nu level ${questState.level}! +20 max HP, full healing!`;
+}
+
+function checkAchievements() {
+  const newAchievements = [];
+  
+  if (questState.enemiesDefeated === 1 && !questState.achievements.includes('first_kill')) {
+    newAchievements.push('first_kill');
+    questState.achievements.push('first_kill');
+  }
+  
+  if (questState.questionsAnswered === 10 && !questState.achievements.includes('scholar')) {
+    newAchievements.push('scholar');
+    questState.achievements.push('scholar');
+  }
+  
+  if (questState.level >= 5 && !questState.achievements.includes('master')) {
+    newAchievements.push('master');
+    questState.achievements.push('master');
+  }
+  
+  if (newAchievements.length > 0) {
+    const achievementNames = {
+      'first_kill': '🏆 Första mordet',
+      'scholar': '📚 Lärde',
+      'master': '👑 Mästare'
+    };
+    
+    const newAchievementText = newAchievements.map(a => achievementNames[a]).join(', ');
+    document.getElementById('questDialogue').textContent += `\n\n🏆 Achievement unlocked: ${newAchievementText}!`;
+  }
+  
+  updateQuestUI();
+}
+
+function gameOver() {
+  document.getElementById('questDialogue').textContent = 
+    `💀 GAME OVER! Du besegrade ${questState.enemiesDefeated} fiender och svarade på ${questState.questionsAnswered} frågor.`;
+  
+  document.getElementById('btnQuestStart').style.display = 'block';
+  document.getElementById('btnQuestAttack').style.display = 'none';
+  document.getElementById('btnQuestContinue').style.display = 'none';
+  
+  // Save score
+  const name = prompt('Skriv ditt namn för leaderboarden:');
+  if (name) {
+    const key = 'leaderboard:lbQuest';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    list.push({ 
+      name, 
+      score: questState.enemiesDefeated * 10 + questState.questionsAnswered * 5 + questState.level * 20,
+      enemies: questState.enemiesDefeated,
+      questions: questState.questionsAnswered,
+      level: questState.level,
+      ts: Date.now() 
+    });
+    list.sort((a, b) => b.score - a.score || a.ts - b.ts);
+    localStorage.setItem(key, JSON.stringify(list.slice(0, 10)));
+    renderLeaderboard('lbQuest');
+  }
+}
+
+function continueQuest() {
+  if (questState.location === 'Final Boss Chamber') {
+    document.getElementById('questDialogue').textContent = 
+      '🎉 Grattis! Du har klarat Knowledge Quest! Du är nu en mästare inom företagsekonomi!';
+    return;
+  }
+  
+  spawnEnemy();
+}
+
+function restartQuest() {
+  questState = {
+    level: 1,
+    xp: 0,
+    xpNeeded: 100,
+    hp: 100,
+    maxHp: 100,
+    gold: 0,
+    location: 'Startdungeon',
+    inBattle: false,
+    currentEnemy: null,
+    currentQuestion: null,
+    inventory: [],
+    achievements: [],
+    enemiesDefeated: 0,
+    questionsAnswered: 0
+  };
+  
+  document.getElementById('questScene').style.display = 'block';
+  document.getElementById('questBattle').style.display = 'none';
+  document.getElementById('questEnemy').style.display = 'none';
+  document.getElementById('btnQuestStart').style.display = 'block';
+  document.getElementById('btnQuestAttack').style.display = 'none';
+  document.getElementById('btnQuestContinue').style.display = 'none';
+  
+  updateQuestUI();
+  document.getElementById('questDialogue').textContent = 
+    'Välkommen till Knowledge Quest! Din uppgift är att utforska dungeons och besegra monster genom att svara på frågor. Klicka "Starta äventyr" för att börja!';
+}
+
+function updateQuestUI() {
+  document.getElementById('questLevel').textContent = questState.level;
+  document.getElementById('questXP').textContent = questState.xp;
+  document.getElementById('questXPNeeded').textContent = questState.xpNeeded;
+  document.getElementById('questHP').textContent = questState.hp;
+  document.getElementById('questGold').textContent = questState.gold;
+  document.getElementById('questLocation').textContent = questState.location;
+  
+  // Update progress bar
+  const progressPercent = (questState.xp / questState.xpNeeded) * 100;
+  document.getElementById('questProgressFill').style.width = `${Math.min(100, progressPercent)}%`;
+  
+  // Update inventory
+  const inventoryText = questState.inventory.length > 0 
+    ? questState.inventory.join(', ') 
+    : 'Tom';
+  document.getElementById('questInventory').textContent = inventoryText;
+  
+  // Update achievements
+  const achievementNames = {
+    'first_kill': '🏆 Första mordet',
+    'scholar': '📚 Lärde', 
+    'master': '👑 Mästare'
+  };
+  
+  const achievementText = questState.achievements.length > 0
+    ? questState.achievements.map(a => achievementNames[a]).join(', ')
+    : 'Inga än';
+  document.getElementById('questAchievements').textContent = achievementText;
 }
 
 

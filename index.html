@@ -22,6 +22,7 @@
             <button id="tab-match" class="tab" role="tab" aria-selected="false" aria-controls="panel-match">Matchning</button>
             <button id="tab-quiz-all" class="tab" role="tab" aria-selected="false" aria-controls="panel-quiz-all">Alla kapitel</button>
             <button id="tab-game" class="tab" role="tab" aria-selected="false" aria-controls="panel-game">Concept Rush</button>
+            <button id="tab-quest" class="tab" role="tab" aria-selected="false" aria-controls="panel-quest">Knowledge Quest</button>
             <button id="tab-exam" class="tab" role="tab" aria-selected="false" aria-controls="panel-exam">Prov (Kap 3–6)</button>
         </nav>
     </header>
@@ -99,6 +100,101 @@
                 <div class="leaderboard">
                     <h3>Leaderboard (Concept Rush)</h3>
                     <ol id="lbGame"></ol>
+                </div>
+            </div>
+        </section>
+
+        <section id="panel-quest" class="panel" role="tabpanel" aria-labelledby="tab-quest" hidden>
+            <div class="quest-container">
+                <!-- Karaktärsstatus -->
+                <div class="quest-header">
+                    <div class="character-info">
+                        <div class="character-avatar">🧙‍♂️</div>
+                        <div class="character-stats">
+                            <div class="stat">
+                                <span class="stat-label">Level:</span>
+                                <span id="questLevel">1</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">XP:</span>
+                                <span id="questXP">0</span>/<span id="questXPNeeded">100</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">HP:</span>
+                                <span id="questHP">100</span>/100
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Guld:</span>
+                                <span id="questGold">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quest-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="questProgressFill"></div>
+                        </div>
+                        <div class="quest-location" id="questLocation">Startdungeon</div>
+                    </div>
+                </div>
+
+                <!-- Spelområde -->
+                <div class="quest-game-area">
+                    <div class="quest-scene" id="questScene">
+                        <div class="scene-background">🏰</div>
+                        <div class="character-position">🧙‍♂️</div>
+                        <div class="enemy" id="questEnemy" style="display: none;">👹</div>
+                    </div>
+                    
+                    <div class="quest-dialogue" id="questDialogue">
+                        Välkommen till Knowledge Quest! Din uppgift är att utforska dungeons och besegra monster genom att svara på frågor. Klicka "Starta äventyr" för att börja!
+                    </div>
+                </div>
+
+                <!-- Kamp-område -->
+                <div class="quest-battle" id="questBattle" style="display: none;">
+                    <div class="battle-enemy">
+                        <div class="enemy-avatar" id="battleEnemyAvatar">👹</div>
+                        <div class="enemy-name" id="battleEnemyName">Dungeon Monster</div>
+                        <div class="enemy-hp">
+                            <div class="hp-bar">
+                                <div class="hp-fill" id="enemyHPFill"></div>
+                            </div>
+                            <span id="enemyHP">100</span>/100
+                        </div>
+                    </div>
+                    
+                    <div class="battle-question">
+                        <h3 id="battleQuestion">Fråga kommer här...</h3>
+                        <div id="battleOptions" class="battle-options"></div>
+                    </div>
+                    
+                    <div class="battle-result" id="battleResult" style="display: none;"></div>
+                </div>
+
+                <!-- Kontroller -->
+                <div class="quest-controls">
+                    <button id="btnQuestStart" class="primary">Starta äventyr</button>
+                    <button id="btnQuestAttack" class="primary" style="display: none;">Attackera med kunskap!</button>
+                    <button id="btnQuestContinue" class="primary" style="display: none;">Fortsätt</button>
+                    <button id="btnQuestRestart" class="ghost">Starta om</button>
+                </div>
+
+                <!-- Inventory & Achievements -->
+                <div class="quest-sidebar">
+                    <div class="quest-inventory">
+                        <h4>🎒 Inventory</h4>
+                        <div id="questInventory">Tom</div>
+                    </div>
+                    <div class="quest-achievements">
+                        <h4>🏆 Achievements</h4>
+                        <div id="questAchievements">Inga än</div>
+                    </div>
+                </div>
+
+                <!-- Leaderboard -->
+                <div class="leaderboard">
+                    <h3>🏆 Quest Leaderboard</h3>
+                    <ol id="lbQuest"></ol>
                 </div>
             </div>
         </section>

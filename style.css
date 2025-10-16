@@ -555,4 +555,344 @@ textarea:focus-visible {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Knowledge Quest RPG Styles */
+.quest-container {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+  max-width: 1400px;
+  width: 100%;
+}
+
+.quest-header {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.character-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.character-avatar {
+  font-size: 48px;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+.character-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--card);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.stat span:last-child {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.quest-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar {
+  width: 200px;
+  height: 8px;
+  background: var(--card);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+.quest-location {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.quest-game-area {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  min-height: 300px;
+}
+
+.quest-scene {
+  position: relative;
+  height: 200px;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.scene-background {
+  font-size: 64px;
+  opacity: 0.3;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+
+.character-position {
+  font-size: 48px;
+  z-index: 2;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.enemy {
+  font-size: 48px;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateY(-50%) rotate(0deg); }
+  25% { transform: translateY(-50%) rotate(-5deg); }
+  75% { transform: translateY(-50%) rotate(5deg); }
+}
+
+.quest-dialogue {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.quest-battle {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.battle-enemy {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.enemy-avatar {
+  font-size: 48px;
+  animation: shake 1s infinite;
+}
+
+.enemy-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.enemy-hp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.hp-bar {
+  width: 120px;
+  height: 8px;
+  background: var(--card);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--bad) 0%, var(--warning) 50%, var(--good) 100%);
+  width: 100%;
+  transition: width 0.3s ease;
+}
+
+.battle-question {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.battle-question h3 {
+  margin: 0 0 16px 0;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.battle-options {
+  display: grid;
+  gap: 8px;
+}
+
+.battle-option {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.battle-option:hover {
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.battle-option.correct {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--good);
+  color: var(--good);
+}
+
+.battle-option.incorrect {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.battle-result {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.quest-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.quest-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.quest-inventory,
+.quest-achievements {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.quest-inventory h4,
+.quest-achievements h4 {
+  margin: 0 0 12px 0;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#questInventory,
+#questAchievements {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Responsive quest layout */
+@media (max-width: 1024px) {
+  .quest-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .quest-sidebar {
+    order: -1;
+  }
+  
+  .character-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .character-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .quest-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .character-info {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
 
