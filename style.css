@@ -478,6 +478,7 @@ button:disabled {
   background: rgba(30, 41, 59, 0.5);
   backdrop-filter: blur(10px);
   font-weight: 500;
+  margin-top: auto;
 }
 
 /* Responsive design */
