@@ -21,10 +21,22 @@ const DATA = [
   { id: 'k4-efor', topic: 'Kap 4: Företagsformer', question: 'Vad är en ekonomisk förening?', answer: 'Kooperativ ägd av medlemmar (minst 3), ex. Coop, Arla. Medlemmarna har rösträtt.', tags: ['ekonomisk förening'] },
   { id: 'k4-reg', topic: 'Kap 4: Företagsformer', question: 'Vad måste alla företag göra vid start?', answer: 'Registrera hos Bolagsverket och Skatteverket samt godkännas för F-skatt. Ålderskrav: 18 år (16 år för enskild firma med målsmans godkännande).', tags: ['registrering'] },
 
+  // Tillägg Kap 4
+  { id: 'k4-fskatt-def', topic: 'Kap 4: Företagsformer', question: 'Vad är F-skatt?', answer: 'Godkännande från Skatteverket att själv betala in skatt och egenavgifter; krävs för att fakturera som företag.', tags: ['f-skatt','skatt'] },
+  { id: 'k4-juridisk-person', topic: 'Kap 4: Företagsformer', question: 'Vad innebär juridisk person?', answer: 'Organisationen har egna rättigheter/skyldigheter, kan teckna avtal och ställas till svars; skiljer ekonomi från ägarnas privata.', tags: ['juridisk person'] },
+  { id: 'k4-solidariskt-ansvar', topic: 'Kap 4: Företagsformer', question: 'Vad betyder solidariskt ansvar i HB?', answer: 'Alla delägare ansvarar gemensamt för skulder; vem som helst kan krävas på hela beloppet.', tags: ['handelsbolag','ansvar'] },
+  { id: 'k4-aktiekapital', topic: 'Kap 4: Företagsformer', question: 'Hur stort aktiekapital krävs för privat AB?', answer: 'Minst 25 000 kr (publikt 500 000 kr).', tags: ['aktiebolag'] },
+
   // Kap 5 – Finansiering
   { id: 'k5-orga', topic: 'Kap 5: Finansiering', question: 'Vilka organisationer hjälper nystartade företag?', answer: 'Almi (utbildning, lån), Tillväxtverket (råd, finansiering), Business Sweden (exportstöd), inkubatorer (rådgivning/kapital).', tags: ['finansiering'] },
   { id: 'k5-alt', topic: 'Kap 5: Finansiering', question: 'Nämn finansieringsalternativ.', answer: 'Eget kapital, riskkapital, affärsänglar, crowdfunding, banklån, kreditinstitut, factoring (sälja fakturor), leasing.', tags: ['finansiering'] },
   { id: 'k5-faser', topic: 'Kap 5: Finansiering', question: 'Hur förändras kapitalbehov över tid?', answer: 'Start: ägarkapital, Almi, riskkapital, crowdfunding, affärsänglar. Expansion: banklån, fler ägare. Moget: banklån, factoring, leasing.', tags: ['finansiering'] },
+
+  // Tillägg Kap 5
+  { id: 'k5-factoring-def', topic: 'Kap 5: Finansiering', question: 'Vad är factoring?', answer: 'Att sälja sina kundfakturor till ett annat företag för snabbare likviditet, mot avgift.', tags: ['factoring'] },
+  { id: 'k5-leasing-def', topic: 'Kap 5: Finansiering', question: 'Vad är leasing?', answer: 'Att hyra utrustning istället för att köpa, jämnare kassaflöde men total kostnad kan bli högre.', tags: ['leasing'] },
+  { id: 'k5-affarsanglar-def', topic: 'Kap 5: Finansiering', question: 'Vad gör en affärsängel?', answer: 'Investerar kapital mot ägarandelar och bidrar ofta med rådgivning och nätverk.', tags: ['affärsängel'] },
+  { id: 'k5-riskkapital', topic: 'Kap 5: Finansiering', question: 'Vad är riskkapital?', answer: 'Extern finansiering där investerare får ägarandelar; hög risk, hög potential.', tags: ['riskkapital'] },
 
   // Kap 6 – Organisation och kultur
   { id: 'k6-ledarstruktur', topic: 'Kap 6: Organisation & kultur', question: 'Hur ser ledarstrukturen ut i AB?', answer: 'Bolagsstämma → Styrelse → VD. VD strukturerar organisationen under sig.', tags: ['organisation'] },
@@ -34,6 +46,11 @@ const DATA = [
   { id: 'k6-sit-ledarskap', topic: 'Kap 6: Organisation & kultur', question: 'Vad är situationsanpassat ledarskap?', answer: 'Att variera ledarskap efter situation: ibland strikt, ibland lyssnande, ibland lekfullt.', tags: ['ledarskap'] },
   { id: 'k6-xy-teori', topic: 'Kap 6: Organisation & kultur', question: 'Vad beskriver X- och Y-teorin?', answer: 'X: ser anställda som lata, styr med order/kontroll; lön som drivkraft. Y: ser anställda som meningssökande, delaktighet; utveckling och frihet som drivkrafter.', tags: ['ledarskap','McGregor'] },
   { id: 'k6-kultur', topic: 'Kap 6: Organisation & kultur', question: 'Vad är företagskultur?', answer: 'Normer, värderingar och beteenden som “sitter i väggarna”, märks internt och externt.', tags: ['kultur'] },
+
+  // Tillägg Kap 3 (fördjupning)
+  { id: 'k3-usp-exempel', topic: 'Kap 3: Affärsidé', question: 'Ge tre exempel på möjliga USP:er.', answer: 'Snabb leverans, unik kundservice, hållbar produktion.', tags: ['usp'] },
+  { id: 'k3-malgrupp', topic: 'Kap 3: Affärsidé', question: 'Hur definieras en målgrupp?', answer: 'En tydligt avgränsad grupp kunder med gemensamma behov/egenskaper som erbjudandet riktas till.', tags: ['målgrupp'] },
+  { id: 'k3-resurser', topic: 'Kap 3: Affärsidé', question: 'Nämn resurser som krävs för att förverkliga en affärsidé.', answer: 'Kompetens, kapital, tid, nätverk, leverantörer, lokaler, teknik.', tags: ['resurser'] },
 ];
 
 // Hjälpfunktioner för att hämta data per kapitel
