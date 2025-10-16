@@ -1,0 +1,95 @@
+:root {
+  --bg: #0b1020;
+  --card: #141a2f;
+  --text: #e9eef7;
+  --muted: #b8c1d9;
+  --primary: #5b8cff;
+  --primary-600: #3f73ff;
+  --border: #24304d;
+  --good: #2ecc71;
+  --bad: #ff6b6b;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: radial-gradient(1200px 800px at 70% -10%, #1a2240 0%, var(--bg) 60%);
+  color: var(--text);
+  display: flex; flex-direction: column;
+}
+
+.app-header { padding: 20px; border-bottom: 1px solid var(--border); display: grid; gap: 12px; }
+.app-header h1 { margin: 0; font-size: 22px; }
+.controls-row { display: flex; gap: 10px; align-items: center; }
+.controls-row select {
+  background: var(--card); color: var(--text); border: 1px solid var(--border);
+  border-radius: 10px; padding: 8px 10px; outline: none;
+}
+
+.mode-tabs { display: inline-flex; gap: 8px; }
+.tab { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 8px 12px; border-radius: 999px; cursor: pointer; }
+.tab.active { color: var(--text); border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+
+.app-main { flex: 1; display: grid; place-items: center; padding: 20px; }
+.panel { width: min(920px, 100%); }
+.panel[hidden] { display: none; }
+.panel.active { display: block; }
+
+.flashcard {
+  position: relative; height: 280px; perspective: 1000px; user-select: none; margin: 12px 0;
+}
+.flashcard-face {
+  position: absolute; inset: 0; background: linear-gradient(180deg, #151d36, #0e1426);
+  border: 1px solid var(--border); border-radius: 16px; padding: 22px; font-size: 18px; line-height: 1.5;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  backface-visibility: hidden; transform: rotateY(0deg);
+}
+.flashcard-face.back { transform: rotateY(180deg); }
+.flashcard.flipped .flashcard-face.front { transform: rotateY(180deg); }
+.flashcard.flipped .flashcard-face.back { transform: rotateY(360deg); }
+
+.toolbar { display: flex; gap: 10px; align-items: center; }
+button { background: var(--card); color: var(--text); border: 1px solid var(--border); padding: 10px 14px; border-radius: 10px; cursor: pointer; }
+button.primary { background: var(--primary); border-color: var(--primary-600); }
+button.ghost { background: transparent; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.progress { margin-top: 8px; color: var(--muted); }
+
+.quiz-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+.quiz-meta { display: flex; justify-content: space-between; color: var(--muted); }
+.quiz-options { display: grid; gap: 10px; margin: 16px 0; }
+.quiz-option { text-align: left; }
+.quiz-option.correct { outline: 2px solid var(--good); }
+.quiz-option.incorrect { outline: 2px solid var(--bad); }
+
+.leaderboard { margin-top: 16px; }
+.leaderboard ol { margin: 8px 0 0; padding-left: 18px; }
+.leaderboard li { color: var(--muted); }
+
+.game-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+.game-meta { display: flex; gap: 16px; color: var(--muted); }
+
+.exam-section { margin: 16px 0; }
+.exam-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+.exam-item h4 { margin: 0 0 8px 0; font-size: 16px; }
+.exam-item textarea { width: 100%; min-height: 84px; resize: vertical; background: #0f1831; color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
+.exam-tf { display: grid; gap: 8px; }
+.exam-tf .tf-row { display: flex; gap: 8px; align-items: center; }
+.exam-tf label { color: var(--muted); }
+
+.match-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: var(--muted); }
+.match-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.match-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; cursor: pointer; min-height: 64px; display: flex; align-items: center; }
+.match-card.selected { outline: 2px solid var(--primary); }
+.match-card.matched { opacity: 0.5; }
+
+.app-footer { padding: 16px; border-top: 1px solid var(--border); color: var(--muted); text-align: center; }
+
+@media (min-width: 720px) {
+  .flashcard { height: 320px; }
+  .flashcard-face { font-size: 20px; }
+}
+
+

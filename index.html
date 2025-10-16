@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="sv">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FEK Prov – Pluggsajt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>Företagsekonomi – Pluggsajt</h1>
+        <div class="controls-row">
+            <label for="topicSelect">Kapitel</label>
+            <select id="topicSelect" aria-label="Välj kapitel"></select>
+        </div>
+        <nav class="mode-tabs" role="tablist" aria-label="Studielägen">
+            <button id="tab-flashcards" class="tab active" role="tab" aria-selected="true" aria-controls="panel-flashcards">Flashcards</button>
+            <button id="tab-quiz" class="tab" role="tab" aria-selected="false" aria-controls="panel-quiz">Quiz</button>
+            <button id="tab-match" class="tab" role="tab" aria-selected="false" aria-controls="panel-match">Matchning</button>
+            <button id="tab-quiz-all" class="tab" role="tab" aria-selected="false" aria-controls="panel-quiz-all">Alla kapitel</button>
+            <button id="tab-game" class="tab" role="tab" aria-selected="false" aria-controls="panel-game">Concept Rush</button>
+            <button id="tab-exam" class="tab" role="tab" aria-selected="false" aria-controls="panel-exam">Prov (Kap 3–6)</button>
+        </nav>
+    </header>
+
+    <main class="app-main">
+        <section id="panel-flashcards" class="panel active" role="tabpanel" aria-labelledby="tab-flashcards">
+            <div class="flashcard" id="flashcard" tabindex="0" aria-live="polite" aria-atomic="true">
+                <div class="flashcard-face" id="flashcard-front"></div>
+                <div class="flashcard-face back" id="flashcard-back"></div>
+            </div>
+            <div class="toolbar">
+                <button id="btnPrev">Föregående</button>
+                <button id="btnFlip" class="primary">Vänd</button>
+                <button id="btnNext">Nästa</button>
+                <button id="btnShuffle" class="ghost">Slumpa</button>
+            </div>
+            <div class="progress" id="flashProgress">0 / 0</div>
+        </section>
+
+        <section id="panel-quiz" class="panel" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+            <div class="quiz-box" id="quizBox">
+                <div class="quiz-meta">
+                    <div id="quizCounter">Fråga 1 / 10</div>
+                    <div id="quizScore">Poäng: 0</div>
+                </div>
+                <h2 id="quizQuestion">Frågetext</h2>
+                <div id="quizOptions" class="quiz-options"></div>
+                <div class="toolbar">
+                    <button id="btnNextQuestion" class="primary">Nästa</button>
+                    <button id="btnRestartQuiz" class="ghost">Starta om</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="panel-match" class="panel" role="tabpanel" aria-labelledby="tab-match" hidden>
+            <div class="match-meta">
+                <div id="matchStatus">0 / 0 par matchade</div>
+                <button id="btnNewMatch" class="ghost">Ny omgång</button>
+            </div>
+            <div id="matchGrid" class="match-grid" aria-live="polite"></div>
+        </section>
+
+        <section id="panel-quiz-all" class="panel" role="tabpanel" aria-labelledby="tab-quiz-all" hidden>
+            <div class="quiz-box" id="quizAllBox">
+                <div class="quiz-meta">
+                    <div id="quizAllCounter">Fråga 1</div>
+                    <div id="quizAllScore">Poäng: 0</div>
+                </div>
+                <h2 id="quizAllQuestion">Frågetext</h2>
+                <div id="quizAllOptions" class="quiz-options"></div>
+                <div class="toolbar">
+                    <button id="btnQuizAllNext" class="primary">Nästa</button>
+                    <button id="btnQuizAllRestart" class="ghost">Starta om</button>
+                </div>
+                <div class="leaderboard">
+                    <h3>Leaderboard (Alla kapitel)</h3>
+                    <ol id="lbQuizAll"></ol>
+                </div>
+            </div>
+        </section>
+
+        <section id="panel-game" class="panel" role="tabpanel" aria-labelledby="tab-game" hidden>
+            <div class="game-box">
+                <div class="game-meta">
+                    <div id="gameTimer">Tid: 60s</div>
+                    <div id="gameScore">Poäng: 0</div>
+                    <div id="gameStreak">Streak: 0</div>
+                </div>
+                <h2 id="gamePrompt">Matcha rätt svar snabbt!</h2>
+                <div id="gameChoices" class="quiz-options"></div>
+                <div class="toolbar">
+                    <button id="btnGameStart" class="primary">Starta</button>
+                    <button id="btnGameRestart" class="ghost">Starta om</button>
+                </div>
+                <div class="leaderboard">
+                    <h3>Leaderboard (Concept Rush)</h3>
+                    <ol id="lbGame"></ol>
+                </div>
+            </div>
+        </section>
+
+        <section id="panel-exam" class="panel" role="tabpanel" aria-labelledby="tab-exam" hidden>
+            <div class="quiz-box" id="examBox">
+                <div class="quiz-meta">
+                    <div id="examTitle">Slumpat prov (Kap 3–6)</div>
+                    <div id="examScoreLive">Poäng (TF): 0/4</div>
+                </div>
+                <div class="toolbar" style="margin: 8px 0 16px;">
+                    <button id="btnExamGenerate" class="ghost">Generera nytt prov</button>
+                </div>
+
+                <div class="exam-section">
+                    <h3>1) Sant/Falskt (4 st)</h3>
+                    <div id="examTF"></div>
+                </div>
+
+                <div class="exam-section">
+                    <h3>2) Förklara begrepp (5 st – kort)</h3>
+                    <div id="examExplainShort"></div>
+                </div>
+
+                <div class="exam-section">
+                    <h3>3) Förklara utförligare (2 st – medellånga)</h3>
+                    <div id="examExplainMedium"></div>
+                </div>
+
+                <div class="exam-section">
+                    <h3>4) Större resonemangsfrågor (3 st)</h3>
+                    <div id="examBig"></div>
+                </div>
+
+                <div class="toolbar">
+                    <button id="btnExamGrade" class="primary">Rätta prov</button>
+                    <button id="btnExamReset" class="ghost">Rensa svar</button>
+                </div>
+
+                <div class="leaderboard">
+                    <h3>Resultat (valfritt)</h3>
+                    <div class="controls-row" style="gap:8px; margin-bottom:8px;">
+                        <input id="examName" placeholder="Ditt namn" aria-label="Ditt namn" />
+                        <button id="btnExamSave" class="ghost">Spara resultat</button>
+                    </div>
+                    <ol id="lbExam"></ol>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <div>
+            Byggd för att plugga FEK – dina anteckningar, tre lägen, helt offline.
+        </div>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+<!-- Tangentbordsstöd: pilar (vänster/höger) för kort, mellanslag för att vända -->
+<!-- Sidan är helt statisk: kan köras lokalt genom att öppna index.html -->
+</html>
+
+
