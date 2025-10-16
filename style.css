@@ -843,11 +843,97 @@ textarea:focus-visible {
 }
 
 .quest-inventory,
-.quest-achievements {
+.quest-achievements,
+.quest-upgrades {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 20px;
+  margin-bottom: 16px;
+}
+
+.quest-shop {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  grid-column: 1 / -1;
+}
+
+.shop-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.shop-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shop-item:hover {
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.shop-item.owned {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.shop-item.affordable {
+  border-color: var(--good);
+}
+
+.shop-item.expensive {
+  border-color: var(--bad);
+}
+
+.shop-item h4 {
+  margin: 0 0 8px 0;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.shop-item p {
+  margin: 0 0 8px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.shop-item .price {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.timer-display {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.timer-display.warning {
+  border-color: var(--warning);
+  color: var(--warning);
+  animation: pulse 1s infinite;
+}
+
+.timer-display.danger {
+  border-color: var(--bad);
+  color: var(--bad);
+  animation: pulse 0.5s infinite;
 }
 
 .quest-inventory h4,

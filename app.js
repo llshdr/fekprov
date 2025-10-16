@@ -600,16 +600,35 @@ let questState = {
   currentQuestion: null,
   inventory: [],
   achievements: [],
+  upgrades: [],
   enemiesDefeated: 0,
-  questionsAnswered: 0
+  questionsAnswered: 0,
+  difficulty: 1,
+  timeLimit: 0,
+  currentTimer: 0,
+  timerInterval: null
 };
 
 const ENEMIES = [
-  { name: 'Dungeon Goblin', emoji: '👹', hp: 50, xpReward: 25, goldReward: 10 },
-  { name: 'Knowledge Troll', emoji: '🧌', hp: 75, xpReward: 35, goldReward: 15 },
-  { name: 'Business Dragon', emoji: '🐉', hp: 100, xpReward: 50, goldReward: 25 },
-  { name: 'Finance Phantom', emoji: '👻', hp: 80, xpReward: 40, goldReward: 20 },
-  { name: 'Management Beast', emoji: '🦁', hp: 90, xpReward: 45, goldReward: 22 }
+  { name: 'Dungeon Goblin', emoji: '👹', hp: 50, xpReward: 25, goldReward: 10, difficulty: 1, timeLimit: 0 },
+  { name: 'Knowledge Troll', emoji: '🧌', hp: 75, xpReward: 35, goldReward: 15, difficulty: 1, timeLimit: 0 },
+  { name: 'Business Dragon', emoji: '🐉', hp: 100, xpReward: 50, goldReward: 25, difficulty: 2, timeLimit: 0 },
+  { name: 'Finance Phantom', emoji: '👻', hp: 80, xpReward: 40, goldReward: 20, difficulty: 2, timeLimit: 0 },
+  { name: 'Management Beast', emoji: '🦁', hp: 90, xpReward: 45, goldReward: 22, difficulty: 2, timeLimit: 0 },
+  { name: 'SWOT Demon', emoji: '😈', hp: 150, xpReward: 75, goldReward: 40, difficulty: 3, timeLimit: 15 },
+  { name: 'Leadership Titan', emoji: '👑', hp: 200, xpReward: 100, goldReward: 60, difficulty: 4, timeLimit: 12 },
+  { name: 'Final Boss - Knowledge King', emoji: '🧙‍♂️', hp: 300, xpReward: 200, goldReward: 100, difficulty: 5, timeLimit: 10 }
+];
+
+const SHOP_ITEMS = [
+  { id: 'health_potion', name: '💊 Health Potion', description: 'Heal 50 HP', price: 20, effect: 'heal', value: 50 },
+  { id: 'knowledge_boost', name: '📚 Knowledge Boost', description: '+25% XP för 5 strider', price: 50, effect: 'xp_boost', value: 25, duration: 5 },
+  { id: 'time_extension', name: '⏰ Time Extension', description: '+5 sekunder på timer', price: 30, effect: 'time_boost', value: 5 },
+  { id: 'damage_boost', name: '⚔️ Damage Boost', description: '+50% skada för 3 strider', price: 40, effect: 'damage_boost', value: 50, duration: 3 },
+  { id: 'gold_magnet', name: '💰 Gold Magnet', description: '+100% guld för 10 strider', price: 60, effect: 'gold_boost', value: 100, duration: 10 },
+  { id: 'wisdom_amulet', name: '🔮 Wisdom Amulet', description: 'Permanent +10% XP', price: 200, effect: 'permanent_xp', value: 10, permanent: true },
+  { id: 'speed_ring', name: '💍 Speed Ring', description: 'Permanent +3 sekunder timer', price: 150, effect: 'permanent_time', value: 3, permanent: true },
+  { id: 'power_gauntlet', name: '🦾 Power Gauntlet', description: 'Permanent +25% skada', price: 300, effect: 'permanent_damage', value: 25, permanent: true }
 ];
 
 const LOCATIONS = [
@@ -622,6 +641,8 @@ function initQuest() {
   document.getElementById('btnQuestAttack').addEventListener('click', attackEnemy);
   document.getElementById('btnQuestContinue').addEventListener('click', continueQuest);
   document.getElementById('btnQuestRestart').addEventListener('click', restartQuest);
+  document.getElementById('btnOpenShop').addEventListener('click', openShop);
+  document.getElementById('btnShopClose').addEventListener('click', closeShop);
   renderLeaderboard('lbQuest');
   updateQuestUI();
 }
@@ -641,13 +662,27 @@ function startQuest() {
 }
 
 function spawnEnemy() {
-  const enemy = ENEMIES[Math.floor(Math.random() * ENEMIES.length)];
+  // Difficulty increases with level and location
+  const locationIndex = LOCATIONS.indexOf(questState.location);
+  const difficultyLevel = Math.min(5, Math.floor(questState.level / 2) + locationIndex + 1);
+  
+  // Filter enemies by difficulty
+  const availableEnemies = ENEMIES.filter(e => e.difficulty <= difficultyLevel);
+  const enemy = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
+  
   questState.currentEnemy = { ...enemy, currentHp: enemy.hp };
+  questState.difficulty = difficultyLevel;
+  questState.timeLimit = enemy.timeLimit;
   
   document.getElementById('questEnemy').style.display = 'block';
   document.getElementById('questEnemy').textContent = enemy.emoji;
-  document.getElementById('questDialogue').textContent = 
-    `Ett ${enemy.name} har dykt upp! Din kunskap är ditt vapen - svara på frågor för att besegra det!`;
+  
+  let dialogue = `Ett ${enemy.name} har dykt upp! Din kunskap är ditt vapen - svara på frågor för att besegra det!`;
+  if (enemy.timeLimit > 0) {
+    dialogue += `\n\n⚠️ VARNING: Du har bara ${enemy.timeLimit} sekunder per fråga!`;
+  }
+  
+  document.getElementById('questDialogue').textContent = dialogue;
   
   document.getElementById('btnQuestContinue').style.display = 'none';
   document.getElementById('btnQuestAttack').style.display = 'block';
@@ -660,8 +695,13 @@ function attackEnemy() {
   document.getElementById('questScene').style.display = 'none';
   document.getElementById('questBattle').style.display = 'block';
   
-  // Generate random question
-  const question = DATA[Math.floor(Math.random() * DATA.length)];
+  // Generate question based on difficulty
+  const availableQuestions = DATA.filter(q => {
+    const topicDifficulty = getTopicDifficulty(q.topic);
+    return topicDifficulty <= questState.difficulty;
+  });
+  
+  const question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
   questState.currentQuestion = question;
   
   document.getElementById('battleEnemyAvatar').textContent = questState.currentEnemy.emoji;
@@ -670,6 +710,11 @@ function attackEnemy() {
   document.getElementById('enemyHPFill').style.width = `${(questState.currentEnemy.currentHp / questState.currentEnemy.hp) * 100}%`;
   
   document.getElementById('battleQuestion').textContent = question.question;
+  
+  // Start timer if needed
+  if (questState.timeLimit > 0) {
+    startTimer();
+  }
   
   // Generate wrong answers
   const wrongAnswers = sampleMany(DATA.filter(x => x.id !== question.id).map(x => x.answer), 3);
@@ -686,18 +731,102 @@ function attackEnemy() {
   });
 }
 
+function getTopicDifficulty(topic) {
+  const difficulties = {
+    'Kap 3: Affärsidé': 1,
+    'Kap 4: Företagsformer': 2,
+    'Kap 5: Finansiering': 3,
+    'Kap 6: Organisation & kultur': 4
+  };
+  return difficulties[topic] || 1;
+}
+
+function startTimer() {
+  questState.currentTimer = questState.timeLimit;
+  updateTimerDisplay();
+  
+  questState.timerInterval = setInterval(() => {
+    questState.currentTimer--;
+    updateTimerDisplay();
+    
+    if (questState.currentTimer <= 0) {
+      clearInterval(questState.timerInterval);
+      handleTimeUp();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const timerEl = document.getElementById('battleQuestion');
+  if (!timerEl) return;
+  
+  const timerDisplay = document.createElement('div');
+  timerDisplay.className = 'timer-display';
+  
+  if (questState.currentTimer <= 3) {
+    timerDisplay.classList.add('danger');
+  } else if (questState.currentTimer <= 5) {
+    timerDisplay.classList.add('warning');
+  }
+  
+  timerDisplay.textContent = `⏰ ${questState.currentTimer}s`;
+  
+  // Remove existing timer
+  const existingTimer = document.querySelector('.timer-display');
+  if (existingTimer) {
+    existingTimer.remove();
+  }
+  
+  timerEl.appendChild(timerDisplay);
+}
+
+function handleTimeUp() {
+  const options = document.querySelectorAll('.battle-option');
+  options.forEach(opt => opt.disabled = true);
+  
+  document.getElementById('battleResult').style.display = 'block';
+  document.getElementById('battleResult').textContent = '⏰ TID SLUT! Du missade frågan!';
+  document.getElementById('battleResult').style.color = 'var(--bad)';
+  
+  // Take damage for time up
+  const damage = 15 + Math.floor(Math.random() * 10);
+  questState.hp = Math.max(0, questState.hp - damage);
+  
+  updateQuestUI();
+  
+  if (questState.hp <= 0) {
+    setTimeout(() => gameOver(), 1500);
+  } else {
+    setTimeout(() => {
+      document.getElementById('battleResult').style.display = 'none';
+      attackEnemy(); // Try again
+    }, 2000);
+  }
+}
+
 function handleBattleAnswer(btn, isCorrect) {
+  // Clear timer
+  if (questState.timerInterval) {
+    clearInterval(questState.timerInterval);
+    questState.timerInterval = null;
+  }
+  
   const options = document.querySelectorAll('.battle-option');
   options.forEach(opt => opt.disabled = true);
   
   if (isCorrect) {
     btn.classList.add('correct');
-    const damage = 25 + Math.floor(Math.random() * 15); // 25-40 damage
-    questState.currentEnemy.currentHp = Math.max(0, questState.currentEnemy.currentHp - damage);
+    
+    // Calculate damage with upgrades
+    let baseDamage = 25 + Math.floor(Math.random() * 15); // 25-40 damage
+    const damageBoost = questState.upgrades.filter(u => u.effect === 'damage_boost' || u.effect === 'permanent_damage').length;
+    const totalDamage = Math.floor(baseDamage * (1 + damageBoost * 0.25));
+    
+    questState.currentEnemy.currentHp = Math.max(0, questState.currentEnemy.currentHp - totalDamage);
     questState.questionsAnswered++;
     
     document.getElementById('battleResult').style.display = 'block';
-    document.getElementById('battleResult').textContent = `Korrekt! Du gjorde ${damage} skada!`;
+    document.getElementById('battleResult').textContent = `Korrekt! Du gjorde ${totalDamage} skada!`;
     document.getElementById('battleResult').style.color = 'var(--good)';
     
     // Update enemy HP
@@ -737,8 +866,19 @@ function handleBattleAnswer(btn, isCorrect) {
 
 function defeatEnemy() {
   questState.enemiesDefeated++;
-  questState.xp += questState.currentEnemy.xpReward;
-  questState.gold += questState.currentEnemy.goldReward;
+  
+  // Calculate XP and gold with upgrades
+  let xpReward = questState.currentEnemy.xpReward;
+  let goldReward = questState.currentEnemy.goldReward;
+  
+  const xpBoost = questState.upgrades.filter(u => u.effect === 'xp_boost' || u.effect === 'permanent_xp').length;
+  const goldBoost = questState.upgrades.filter(u => u.effect === 'gold_boost').length;
+  
+  xpReward = Math.floor(xpReward * (1 + xpBoost * 0.25));
+  goldReward = Math.floor(goldReward * (1 + goldBoost));
+  
+  questState.xp += xpReward;
+  questState.gold += goldReward;
   
   // Check for level up
   if (questState.xp >= questState.xpNeeded) {
@@ -749,7 +889,7 @@ function defeatEnemy() {
   checkAchievements();
   
   document.getElementById('battleResult').textContent = 
-    `Besegrat! +${questState.currentEnemy.xpReward} XP, +${questState.currentEnemy.goldReward} guld!`;
+    `Besegrat! +${xpReward} XP, +${goldReward} guld!`;
   document.getElementById('battleResult').style.color = 'var(--good)';
   
   setTimeout(() => {
@@ -880,6 +1020,74 @@ function restartQuest() {
     'Välkommen till Knowledge Quest! Din uppgift är att utforska dungeons och besegra monster genom att svara på frågor. Klicka "Starta äventyr" för att börja!';
 }
 
+function openShop() {
+  document.getElementById('questShop').style.display = 'block';
+  renderShop();
+}
+
+function closeShop() {
+  document.getElementById('questShop').style.display = 'none';
+}
+
+function renderShop() {
+  const shopItemsEl = document.getElementById('shopItems');
+  shopItemsEl.innerHTML = '';
+  
+  SHOP_ITEMS.forEach(item => {
+    const itemEl = document.createElement('div');
+    itemEl.className = 'shop-item';
+    
+    const owned = questState.inventory.some(i => i.id === item.id);
+    const affordable = questState.gold >= item.price;
+    
+    if (owned && item.permanent) {
+      itemEl.classList.add('owned');
+    } else if (affordable) {
+      itemEl.classList.add('affordable');
+    } else {
+      itemEl.classList.add('expensive');
+    }
+    
+    itemEl.innerHTML = `
+      <h4>${item.name}</h4>
+      <p>${item.description}</p>
+      <div class="price">💰 ${item.price} guld</div>
+    `;
+    
+    if (!owned || !item.permanent) {
+      itemEl.addEventListener('click', () => buyItem(item));
+    }
+    
+    shopItemsEl.appendChild(itemEl);
+  });
+}
+
+function buyItem(item) {
+  if (questState.gold < item.price) {
+    alert('Inte tillräckligt med guld!');
+    return;
+  }
+  
+  if (item.permanent && questState.inventory.some(i => i.id === item.id)) {
+    alert('Du äger redan denna permanenta uppgradering!');
+    return;
+  }
+  
+  questState.gold -= item.price;
+  
+  if (item.effect === 'heal') {
+    questState.hp = Math.min(questState.maxHp, questState.hp + item.value);
+    alert(`Du använde ${item.name} och healade ${item.value} HP!`);
+  } else {
+    questState.inventory.push({ ...item, uses: item.duration || 0 });
+    questState.upgrades.push({ ...item, uses: item.duration || 0 });
+    alert(`Du köpte ${item.name}!`);
+  }
+  
+  updateQuestUI();
+  renderShop();
+}
+
 function updateQuestUI() {
   document.getElementById('questLevel').textContent = questState.level;
   document.getElementById('questXP').textContent = questState.xp;
@@ -894,7 +1102,7 @@ function updateQuestUI() {
   
   // Update inventory
   const inventoryText = questState.inventory.length > 0 
-    ? questState.inventory.join(', ') 
+    ? questState.inventory.map(i => `${i.name} (${i.uses || '∞'})`).join(', ') 
     : 'Tom';
   document.getElementById('questInventory').textContent = inventoryText;
   
@@ -902,13 +1110,22 @@ function updateQuestUI() {
   const achievementNames = {
     'first_kill': '🏆 Första mordet',
     'scholar': '📚 Lärde', 
-    'master': '👑 Mästare'
+    'master': '👑 Mästare',
+    'shopaholic': '🛒 Shopaholic',
+    'speed_demon': '⚡ Speed Demon',
+    'knowledge_king': '👑 Knowledge King'
   };
   
   const achievementText = questState.achievements.length > 0
     ? questState.achievements.map(a => achievementNames[a]).join(', ')
     : 'Inga än';
   document.getElementById('questAchievements').textContent = achievementText;
+  
+  // Update upgrades
+  const upgradeText = questState.upgrades.length > 0
+    ? questState.upgrades.map(u => `${u.name} (${u.uses || '∞'})`).join(', ')
+    : 'Inga än';
+  document.getElementById('questUpgrades').textContent = upgradeText;
 }
 
 
